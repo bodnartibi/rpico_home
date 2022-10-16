@@ -4,7 +4,9 @@
 typedef enum {
     LAMP_OFF = 0,
     LAMP_ON,
-    LAMP_CHANGE_LIGHT
+    LAMP_CHANGE_LIGHT,
+
+    LAMP_CMD_END
 } lamp_cmd_t;
 
 void lamp_send(lamp_cmd_t cmd,

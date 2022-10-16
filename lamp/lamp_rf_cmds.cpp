@@ -81,6 +81,21 @@ bool off_cmd_500us[] = {
 
 size_t size_off_cmd_500us = sizeof(off_cmd_500us)/sizeof(off_cmd_500us[0]);
 
+
+bool *cmd_sequences_500us[] = {
+    off_cmd_500us,
+    on_cmd_500us,
+    light_type_cmd_500us,
+    NULL
+};
+
+int size_cmd_sequences_500us[] = {
+    size_off_cmd_500us,
+    size_on_cmd_500us,
+    size_light_type_cmd_500us,
+    0
+};
+
 void send_sequence(void (*set_out)  (bool out),
                    void (*sleep_us) (uint64_t us),
                    int time_us,
@@ -89,7 +104,7 @@ void send_sequence(void (*set_out)  (bool out),
     set_out(cmd[0]);
     sleep_us(time_us);
 
-    for (int i=1; i<n; i++) {
+    for (int i=1; i < n; i++) {
         if (cmd[i-1] != cmd[i]) {
             set_out(cmd[i]);
         }
@@ -101,22 +116,11 @@ void lamp_send(lamp_cmd_t cmd,
                void (*set_out) (bool out),
                void (*sleep_us) (uint64_t us)) {
 
-    send_sequence(set_out, sleep_us, LAMP_TIME_Q_US, cmd_head_500us, size_cmd_head_500us);
+    if (cmd >= LAMP_CMD_END)
+        return;
 
-    switch(cmd) {
-        case LAMP_OFF:
-            send_sequence(set_out, sleep_us, LAMP_TIME_Q_US, off_cmd_500us,  size_off_cmd_500us);
-            break;
-
-        case LAMP_ON:
-            send_sequence(set_out, sleep_us, LAMP_TIME_Q_US, on_cmd_500us,  size_on_cmd_500us);
-            break;
-
-        case LAMP_CHANGE_LIGHT:
-            send_sequence(set_out, sleep_us, LAMP_TIME_Q_US, light_type_cmd_500us,  size_light_type_cmd_500us);
-            break;
-    }
-
-    send_sequence(set_out, sleep_us, LAMP_TIME_Q_US, cmd_tail_500us, size_cmd_tail_500us);
+    send_sequence(set_out, sleep_us, LAMP_TIME_Q_US, cmd_head_500us,           size_cmd_head_500us);
+    send_sequence(set_out, sleep_us, LAMP_TIME_Q_US, cmd_sequences_500us[cmd], size_cmd_sequences_500us[cmd]);
+    send_sequence(set_out, sleep_us, LAMP_TIME_Q_US, cmd_tail_500us,           size_cmd_tail_500us);
     set_out(false);
 }
