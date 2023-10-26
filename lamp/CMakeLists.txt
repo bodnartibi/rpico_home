@@ -1,5 +1,5 @@
 add_library(
     Lamp
-    SHARED
+    STATIC
     lamp_rf_cmds.cpp
 )
